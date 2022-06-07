@@ -91,7 +91,7 @@
 	     (bit) < (size);					\
 	     (bit) = find_next_zero_bit((addr), (size), (bit) + 1))
 
-#include <asm/bitops.h>
+#include <arch/x64/bitops.h>
 
 static __inline__ unsigned get_bitmask_order(unsigned int count)
 {
