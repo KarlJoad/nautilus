@@ -16,6 +16,9 @@ menu "Platform"
         config HVM_HRT
             bool "Hybrid Runtime AeroKernel (HRT for HVM/Multiverse)"
 
+        config RISCV_HOST
+            bool "RISC-V 64-bit Host"
+
         config GEM5
             bool "GEM5-compatible x86_64 kernel"
 
