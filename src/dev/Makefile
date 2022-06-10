@@ -1,5 +1,4 @@
-obj-y += apic.o \
-	 ioapic.o \
+obj-y += ioapic.o \
 	 i8254.o \
 	 ps2.o \
 	 pci.o \

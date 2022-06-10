@@ -31,7 +31,7 @@
 #include <nautilus/fprintk.h>
 #include <nautilus/shell.h>
 #include <nautilus/getopt.h>
-#include <dev/apic.h>
+#include <arch/x64/apic.h>
 #include <test/test.h>
 #include <test/ipi.h>
 #include <arch/x64/bitops.h>

@@ -1,17 +1,17 @@
-/* 
+/*
  * This file is part of the Nautilus AeroKernel developed
- * by the Hobbes and V3VEE Projects with funding from the 
- * United States National  Science Foundation and the Department of Energy.  
+ * by the Hobbes and V3VEE Projects with funding from the
+ * United States National  Science Foundation and the Department of Energy.
  *
  * The V3VEE Project is a joint project between Northwestern University
  * and the University of New Mexico.  The Hobbes Project is a collaboration
- * led by Sandia National Laboratories that includes several national 
+ * led by Sandia National Laboratories that includes several national
  * laboratories and universities. You can find out more at:
  * http://www.v3vee.org  and
  * http://xstack.sandia.gov/hobbes
  *
  * Copyright (c) 2015, Kyle C. Hale <kh@u.northwestern.edu>
- * Copyright (c) 2015, The V3VEE Project  <http://www.v3vee.org> 
+ * Copyright (c) 2015, The V3VEE Project  <http://www.v3vee.org>
  *                     The Hobbes Project <http://xstack.sandia.gov/hobbes>
  * All rights reserved.
  *
@@ -32,7 +32,7 @@
 #include <nautilus/shell.h>
 #include <nautilus/timer.h>
 #include <nautilus/dev.h>
-#include <dev/apic.h>
+#include <arch/x64/apic.h>
 #include <dev/i8254.h>
 #include <lib/bitops.h>
 
@@ -70,7 +70,7 @@ static apic_mode_t get_max_mode()
 {
     cpuid_ret_t c;
     cpuid(0x1, &c);
-    if ((c.c >> 21)&0x1) { 	
+    if ((c.c >> 21)&0x1) {
 	APIC_DEBUG("APIC with X2APIC support\n");
 	return APIC_X2APIC;
     }
@@ -86,15 +86,15 @@ static apic_mode_t get_mode()
     EN = (val>>11)&0x1;
     EXTD = (val>>10)&0x1;
 
-    if (!EN && !EXTD) { 
+    if (!EN && !EXTD) {
 	return APIC_DISABLED;
     }
-    
+
     if (EN && !EXTD) {
 	return APIC_XAPIC;
     }
-    
-    if (EN && EXTD) { 
+
+    if (EN && EXTD) {
 	return APIC_X2APIC;
     }
 
@@ -107,12 +107,12 @@ static int set_mode(struct apic_dev *apic, apic_mode_t mode)
     uint64_t val;
     apic_mode_t cur = get_mode();
 
-    if (mode==cur) { 
+    if (mode==cur) {
 	apic->mode = mode;
 	return 0;
     }
 
-    if (mode==APIC_INVALID) { 
+    if (mode==APIC_INVALID) {
 	return -1;
     }
 
@@ -121,11 +121,11 @@ static int set_mode(struct apic_dev *apic, apic_mode_t mode)
     val &= ~(0x3 << 10);
     msr_write(APIC_BASE_MSR,val);
     // now go to the relevant mode progressing "upwards"
-    if (mode!=APIC_DISABLED) { 
+    if (mode!=APIC_DISABLED) {
 	// switch to XAPIC first
 	val |= 0x2<<10;
 	msr_write(APIC_BASE_MSR,val);
-	if (mode==APIC_X2APIC) { 
+	if (mode==APIC_X2APIC) {
 	    // now to X2APIC if requested
 	    val |= 0x3 <<10;
 	    msr_write(APIC_BASE_MSR,val);
@@ -156,7 +156,7 @@ static int
 null_kick (excp_entry_t * excp, excp_vec_t v, void *state)
 {
     struct apic_dev * apic = (struct apic_dev*)per_cpu_get(apic);
-    
+
     // this communicates that we are in a kick to the scheduler
     // the scheduler will then set this to zero as a side-effect
     // of calling apic_update_oneshot_timer
@@ -182,7 +182,7 @@ error_int_handler (excp_entry_t * excp, excp_vec_t v, void *state)
 
     err &= 0xff;
 
-    APIC_WARN("Error interrupt recieved from local APIC (ID=0x%x) on Core %u (error=0x%x):\n", 
+    APIC_WARN("Error interrupt recieved from local APIC (ID=0x%x) on Core %u (error=0x%x):\n",
             per_cpu_get(apic)->id, my_cpu_id(), err);
 
     while (err) {
@@ -280,7 +280,7 @@ apic_sw_disable (struct apic_dev * apic)
 static void
 apic_assign_spiv (struct apic_dev * apic, uint8_t spiv_vec)
 {
-    apic_write(apic, 
+    apic_write(apic,
             APIC_REG_SPIV,
             apic_read(apic, APIC_REG_SPIV) | spiv_vec);
 }
@@ -293,8 +293,8 @@ apic_global_enable (void)
 }
 
 // This request only makes sense if we are in xapic mode
-static ulong_t 
-apic_get_base_addr (void) 
+static ulong_t
+apic_get_base_addr (void)
 {
     uint64_t data;
     data = msr_read(APIC_BASE_MSR);
@@ -314,7 +314,7 @@ apic_set_base_addr (struct apic_dev * apic, addr_t addr)
 }
 
 
-void 
+void
 apic_do_eoi (void)
 {
     struct apic_dev * apic = (struct apic_dev*)per_cpu_get(apic);
@@ -334,14 +334,14 @@ apic_get_id (struct apic_dev * apic)
 }
 
 
-static inline uint8_t 
+static inline uint8_t
 apic_get_version (struct apic_dev * apic)
 {
     return APIC_VERSION(apic_read(apic, APIC_REG_LVR));
 }
 
 
-uint32_t 
+uint32_t
 apic_wait_for_send(struct apic_dev * apic)
 {
     uint32_t res;
@@ -358,7 +358,7 @@ apic_wait_for_send(struct apic_dev * apic)
 }
 
 
-int 
+int
 apic_get_maxlvt (struct apic_dev * apic)
 {
     uint_t v;
@@ -387,11 +387,11 @@ apic_self_ipi (struct apic_dev * apic, uint_t vector)
     }
 }
 
-void 
-apic_send_iipi (struct apic_dev * apic, uint32_t remote_id) 
+void
+apic_send_iipi (struct apic_dev * apic, uint32_t remote_id)
 {
     uint8_t flags = irq_disable_save();
-    apic_write_icr(apic, 
+    apic_write_icr(apic,
 		   remote_id,
 		   ICR_TRIG_MODE_LEVEL| ICR_LEVEL_ASSERT | ICR_DEL_MODE_INIT);
     irq_enable_restore(flags);
@@ -421,7 +421,7 @@ apic_send_sipi (struct apic_dev * apic, uint32_t remote_id, uint8_t target)
 
 
 void
-apic_bcast_iipi (struct apic_dev * apic) 
+apic_bcast_iipi (struct apic_dev * apic)
 {
     uint8_t flags = irq_disable_save();
     apic_write_icr(apic,
@@ -462,12 +462,12 @@ apic_timer_setup (struct apic_dev * apic, uint32_t quantum_ms)
     uint32_t busfreq;
     uint32_t tmp;
     cpuid_ret_t ret;
-    int x2apic, tscdeadline, arat; 
+    int x2apic, tscdeadline, arat;
 
     APIC_DEBUG("Setting up Local APIC timer for APIC 0x%x\n", apic->id);
 
     cpuid(0x1, &ret);
-  
+
     x2apic = (ret.c >> 21) & 0x1;
     tscdeadline = (ret.c >> 24) & 0x1;
 
@@ -505,7 +505,7 @@ lvt_stringify (uint32_t entry, char *buf)
 			entry & APIC_LVT_VEC_MASK
 		);
 	} else if (delivery_mode == APIC_DEL_MODE_NMI) {
-		sprintf(buf, "NMI   -> IDT VECTOR 2"); 
+		sprintf(buf, "NMI   -> IDT VECTOR 2");
 	} else if (delivery_mode == APIC_DEL_MODE_EXTINT) {
 		sprintf(buf, "ExtINT, hooked to old 8259A PIC");
 	} else {
@@ -519,7 +519,7 @@ lvt_stringify (uint32_t entry, char *buf)
 }
 
 
-static inline uint8_t 
+static inline uint8_t
 amd_has_ext_lvt (struct apic_dev * apic)
 {
     uint32_t ver = apic_read(apic, APIC_REG_LVR);
@@ -541,8 +541,8 @@ amd_setup_ext_lvt (struct apic_dev * apic)
         for (i = 0; i < APIC_EXFR_GET_LVT(apic_read(apic, APIC_REG_EXFR)); i++) {
 
             /* we assign a bogus vector to extended LVT entries */
-            apic_write(apic, APIC_REG_EXTLVT(i), 0 | 
-                    APIC_LVT_DISABLED | 
+            apic_write(apic, APIC_REG_EXTLVT(i), 0 |
+                    APIC_LVT_DISABLED |
                     APIC_EXT_LVT_DUMMY_VEC);
         }
     }
@@ -572,8 +572,8 @@ apic_dump (struct apic_dev * apic)
 		   APIC_LVR_VER(apic_read(apic, APIC_REG_LVR)),
 		   APIC_LVR_MAX(apic_read(apic, APIC_REG_LVR))
 		   );
-	
-	if (mode!=APIC_X2APIC) { 
+
+	if (mode!=APIC_X2APIC) {
 	    APIC_DEBUG(
 		       "  BASE ADDR: %p\n",
 		       apic->base_addr
@@ -594,7 +594,7 @@ apic_dump (struct apic_dev * apic)
         int i;
         for (i = 0; i < APIC_EXFR_GET_LVT(apic_read(apic, APIC_REG_EXFR)); i++) {
             APIC_DEBUG(
-                "      EXT-LVT[%u]: 0x%08x (%s)\n", 
+                "      EXT-LVT[%u]: 0x%08x (%s)\n",
                 i,
                 apic_read(apic, APIC_REG_EXTLVT(i)),
                 lvt_stringify(apic_read(apic, APIC_REG_EXTLVT(i)), buf)
@@ -710,7 +710,7 @@ apic_dump (struct apic_dev * apic)
 		   0
 #endif
 	);
-	if (mode!=APIC_X2APIC) { 
+	if (mode!=APIC_X2APIC) {
 	    // reserved in X2APIC
 	    APIC_DEBUG("      APR (Arbitration Priority Reg): 0x%08x\n",
 #ifndef NAUT_CONFIG_GEM5    // unimplemented in GEM5 - WTF?
@@ -722,7 +722,7 @@ apic_dump (struct apic_dev * apic)
 	}
 
 
-    /* 
+    /*
      * ISR/IRR
      */
     APIC_DEBUG("  IRR/ISR:\n");
@@ -784,7 +784,7 @@ apic_init (struct cpu * core)
 
     if (!check_apic_avail()) {
         panic("No APIC found on core %u, dying\n", core->id);
-    } 
+    }
 
     curmode = get_mode();
     maxmode = get_max_mode();
@@ -794,30 +794,30 @@ apic_init (struct cpu * core)
     APIC_DEBUG("Setting APIC mode to XAPIC (Forced - Maximum mode is %s)\n",
 	       apic_modes[maxmode]);
     set_mode(apic,APIC_XAPIC);
-#else 
+#else
     APIC_DEBUG("Setting APIC mode to maximum available mode (%s)\n",
 	       apic_modes[maxmode]);
     set_mode(apic,maxmode);
 #endif
-   
-    /* In response to AMD erratum #663 
+
+    /* In response to AMD erratum #663
      * the damn thing may give us lint interrupts
      * even when we have them masked
      */
     if (nk_is_amd()  && cpuid_get_family() == 0x15) {
         APIC_DEBUG("Writing Bridge Ctrl MSR for AMD Errata #663\n");
-        msr_write(AMD_MSR_NBRIDGE_CTL, 
-                msr_read(AMD_MSR_NBRIDGE_CTL) | 
-                (1ULL<<23) | 
+        msr_write(AMD_MSR_NBRIDGE_CTL,
+                msr_read(AMD_MSR_NBRIDGE_CTL) |
+                (1ULL<<23) |
                 (1ULL<<54));
     }
 
     if (apic->mode!=APIC_X2APIC) {
 	base_addr       = apic_get_base_addr();
-	
+
 	/* idempotent when not compiled as HRT */
 	apic->base_addr = pa_to_va(base_addr);
-	
+
 #ifndef NAUT_CONFIG_HVM_HRT
 	if (core->is_bsp) {
 	    /* map in the lapic as uncacheable */
@@ -843,14 +843,14 @@ apic_init (struct cpu * core)
 	// see note in apic.h about how to derive
 	// the logical id from the physical id
         val = apic_read(apic,APIC_REG_LDR);
-        APIC_DEBUG("X2APIC LDR=0x%x (cluster 0x%x, logical id 0x%x)\n", 
+        APIC_DEBUG("X2APIC LDR=0x%x (cluster 0x%x, logical id 0x%x)\n",
 		   val, APIC_LDR_X2APIC_CLUSTER(val), APIC_LDR_X2APIC_LOGID(val));
-	
+
     } else {
         val = apic_read(apic, APIC_REG_LDR) & ~APIC_LDR_MASK;
 	// flat group 1 is for watchdog NMIs.
-	// At least one bit must be set in a group	
-	val |= SET_APIC_LOGICAL_ID(1);   
+	// At least one bit must be set in a group
+	val |= SET_APIC_LOGICAL_ID(1);
 	apic_write(apic, APIC_REG_LDR, val);
 	apic_write(apic, APIC_REG_DFR, APIC_DFR_FLAT);
     }
@@ -864,13 +864,13 @@ apic_init (struct cpu * core)
     if (nk_is_amd() && amd_has_ext_lvt(apic)) {
         amd_setup_ext_lvt(apic);
     }
-            
+
 
     /* mask 8259a interrupts */
     apic_write(apic, APIC_REG_LVT0, APIC_DEL_MODE_EXTINT  | APIC_LVT_DISABLED);
 
     /* only BSP takes NMI interrupts */
-    apic_write(apic, APIC_REG_LVT1, 
+    apic_write(apic, APIC_REG_LVT1,
 	       APIC_DEL_MODE_NMI | (core->is_bsp ? 0 : APIC_LVT_DISABLED));
 
     apic_write(apic, APIC_REG_LVTERR, APIC_DEL_MODE_FIXED | APIC_ERROR_INT_VEC); // allow error interrupts
@@ -929,7 +929,7 @@ apic_init (struct cpu * core)
 	    if (amd_has_ext_lvt(apic)) {
 		APIC_DEBUG("AMD APIC has extended space area\n");
 		uint32_t e = apic_read(apic, APIC_REG_EXFR);
-		if (e & 0x1) { 
+		if (e & 0x1) {
 		    APIC_DEBUG("AMD APIC has IER\n");
 		} else {
 		    APIC_DEBUG("AMD APIC does NOT have IER\n");
@@ -939,10 +939,10 @@ apic_init (struct cpu * core)
 	    }
 	} else {
 	    APIC_DEBUG("Not an AMD APIC\n");
-	} 
-	
+	}
+
     }
-    
+
 
     /* turn it on */
     apic_sw_enable(apic);
@@ -961,13 +961,13 @@ apic_init (struct cpu * core)
 
 
 
-void apic_set_oneshot_timer(struct apic_dev *apic, uint32_t ticks) 
+void apic_set_oneshot_timer(struct apic_dev *apic, uint32_t ticks)
 {
     apic_write(apic, APIC_REG_LVTT, APIC_TIMER_ONESHOT | APIC_DEL_MODE_FIXED | APIC_TIMER_INT_VEC);
     apic_write(apic, APIC_REG_TMDCR, APIC_TIMER_DIVCODE);
 
     if (!ticks) {
-	ticks=1; 
+	ticks=1;
     }
     apic_write(apic, APIC_REG_TMICT, ticks);
     apic->timer_set = 1;
@@ -977,10 +977,10 @@ void apic_set_oneshot_timer(struct apic_dev *apic, uint32_t ticks)
 void apic_update_oneshot_timer(struct apic_dev *apic, uint32_t ticks,
 			       nk_timer_condition_t cond)
 {
-    if (!apic->timer_set) { 
+    if (!apic->timer_set) {
 	apic_set_oneshot_timer(apic,ticks);
     } else {
-	switch (cond) { 
+	switch (cond) {
 	case UNCOND:
 	    apic_set_oneshot_timer(apic,ticks);
 	    break;
@@ -997,7 +997,7 @@ void apic_update_oneshot_timer(struct apic_dev *apic, uint32_t ticks,
     // note that this is set at the entry to null_kick
     apic->in_kick_interrupt=0;
 }
-	    
+
 
 
 
@@ -1046,14 +1046,14 @@ try_once:
 
     pit_count = (1193180 / TEST_TIME_SEC_RECIP);
 
-    if (mode==1) { 
+    if (mode==1) {
 	// In the way we are using the PIT, it will count one more than
 	// the target count, hence the "- 1" in the following:
 	pit_count--;
     }
-    
 
-    // Use APIC timer in one shot mode with the divider we will use 
+
+    // Use APIC timer in one shot mode with the divider we will use
     // in normal execution.  We will count down from a large number
     // and do not expect interrupts because it should not hit zero.
     // timer is masked because we don't want an interrupt to occur at all
@@ -1068,13 +1068,13 @@ try_once:
     // combined with the well-known logic for how the 8254 is used in
     // legacy support on PC-compatible platforms.
     //
-    // The 8254 PIT appears in legacy land at ports 
+    // The 8254 PIT appears in legacy land at ports
     // The 8254 PIT has 3 counters wired on a PC as follows:
     //
     //    0: IRQ 0 => not used in Nautilus
     //    1: DMA refresh => not used in any modern hardware
     //    2: Speaker/Output => we use this, as is common
-    //        
+    //
     // Counter 2 is gated by an output of the keyboard controller, and
     // its output is controlled via the same path.  Its output is
     // made available on an input of the keyboard controller.
@@ -1104,13 +1104,13 @@ try_once:
     // Retriggerable One-shot" and give the gate a positive edge.   In this
     // one-shot mode, it is the gate edge that causes it to start counting
     // The output will transition low after the gate edge and then high
-    // after the count is done. 
+    // after the count is done.
     //
     //
 
     uint8_t gate, detect, ctrl;
 
-    // 
+    //
     // configure PIT channel 2 for terminal count in binary
     //
     // 10 11 000 0 (mode 0) or 10 11 001 0 (mode 1)
@@ -1135,12 +1135,12 @@ try_once:
     // Port 0x61 bit 5 is channel 2 counter output (regardless of speaker being driven)
 
     // Now enable it - we want gate on, speaker off
-    
+
     gate = inb(KB_CTRL_PORT_B);
 
     gate &= 0xfc; // channel 2 speaker output disabled
 
-    if (mode==0) { 
+    if (mode==0) {
 	gate |= 0x1;  // channel 2 gate enabled, write of count will start counter
     } else {
 	// gate disabled, write of gate will start counter
@@ -1157,19 +1157,19 @@ try_once:
 
     outb((uint8_t)(pit_count >> 8), PIT_CHAN2_DATA); // MSB
 
-    if (mode==0) { 
+    if (mode==0) {
 	// The PIT counter is now running
     } else {
 	// pulse
 	ctrl = inb(KB_CTRL_PORT_B);
 	ctrl &= 0xfe;
 	outb(ctrl, KB_CTRL_PORT_B);   // force gate low if it's not alread
-	ctrl |= 0x1;                
+	ctrl |= 0x1;
 	outb(ctrl, KB_CTRL_PORT_B); // force gate high to give positive edge
 	// the PIT counter is now running
     }
 
-    /// reset apic timer to our count down value 
+    /// reset apic timer to our count down value
     apic_write(apic, APIC_REG_TMICT, 0xffffffff);
 
 
@@ -1179,7 +1179,7 @@ try_once:
     // we introduce at least 2 us here to be safe
     io_delay();
     io_delay();
-    
+
     int count =0;
     start = rdtsc();
     // we are now waiting for the PIT to finish
@@ -1208,10 +1208,10 @@ try_once:
 
     APIC_DEBUG("One test period (1/%u sec) took %u APIC ticks, pit_count=%u, and %lu cycles\n",
 	       TEST_TIME_SEC_RECIP,apic_timer_ticks,(unsigned) pit_count, end-start);
-    
+
     // occasionally, real hardware can provide surprise
     // results here, probably due to an SMI.
-    if (tries < MAX_TRIES && (end-start < 1000000 || apic_timer_ticks<100)) { 
+    if (tries < MAX_TRIES && (end-start < 1000000 || apic_timer_ticks<100)) {
 	APIC_DEBUG("Test Period is impossible - trying again\n");
 	tries++;
 	goto try_once;
@@ -1222,7 +1222,7 @@ try_once:
 #else
     apic->bus_freq_hz = APIC_TIMER_DIV * apic_timer_ticks * TEST_TIME_SEC_RECIP;
 #endif
-    
+
     APIC_DEBUG("Detected APIC 0x%x bus frequency as %lu Hz\n", apic->id, apic->bus_freq_hz);
 
     // picoseconds are used to try to keep precision for ns and cycle -> tick conversions
@@ -1237,20 +1237,20 @@ try_once:
     apic->cycles_per_us = ((end - start) * TEST_TIME_SEC_RECIP)/1000000ULL;
 #endif
 
-    APIC_DEBUG("Detected APIC 0x%x cycles per us as %lu (core at %lu Hz)\n",apic->id,apic->cycles_per_us,apic->cycles_per_us*1000000); 
-    
-    if (!apic->bus_freq_hz || !apic->ps_per_tick || !apic->cycles_per_us) { 
+    APIC_DEBUG("Detected APIC 0x%x cycles per us as %lu (core at %lu Hz)\n",apic->id,apic->cycles_per_us,apic->cycles_per_us*1000000);
+
+    if (!apic->bus_freq_hz || !apic->ps_per_tick || !apic->cycles_per_us) {
 	APIC_ERROR("Detected time calibration numbers cannot be zero....\n");
 	return -1;
     }
 
     APIC_DEBUG("Succeeded in calibration with mode %d - spun for %d iterations\n", mode,count);
-    
+
     return 0;
 
 }
 
-static void calibrate_apic_timer(struct apic_dev *apic) 
+static void calibrate_apic_timer(struct apic_dev *apic)
 {
 
 #ifndef NAUT_CONFIG_APIC_TIMER_CALIBRATE_INDEPENDENTLY
@@ -1262,7 +1262,7 @@ static void calibrate_apic_timer(struct apic_dev *apic)
 	apic->ps_per_tick = bsp_apic->ps_per_tick;
 	apic->cycles_per_us = bsp_apic->cycles_per_us;
 	apic->cycles_per_tick = bsp_apic->cycles_per_tick;
-	
+
 	APIC_DEBUG("AP APIC id=0x%x cloned BSP APIC's timer configuration\n",
 		   apic->id);
 
@@ -1286,7 +1286,7 @@ static void calibrate_apic_timer(struct apic_dev *apic)
 	}
     }
 
-    
+
     /////////////////////////////////////////////////////////////////
     // Now we will determine the calibration of the TSC to APIC time
     ////////////////////////////////////////////////////////////////
@@ -1313,7 +1313,7 @@ static void calibrate_apic_timer(struct apic_dev *apic)
     extern void nk_simple_timing_loop(uint64_t iter_count);
 
     for (i = 0; i < num_trials; i++) {
-	// set APIC for a long countdown time, longer than our test 
+	// set APIC for a long countdown time, longer than our test
 	// mask to avoid interrupt, also to deal with mask side effect on KNL
 	apic_write(apic, APIC_REG_LVTT, APIC_TIMER_ONESHOT | APIC_DEL_MODE_FIXED | APIC_TIMER_INT_VEC | APIC_TIMER_MASK);
 	apic_write(apic, APIC_REG_TMDCR, APIC_TIMER_DIVCODE);
@@ -1321,7 +1321,7 @@ static void calibrate_apic_timer(struct apic_dev *apic)
 	apic_write(apic, APIC_REG_TMICT, 0xffffffff);
 	start = rdtsc();
 
-	
+
 	// now time a random amount of cycle burning
 	// with both the tsc and the apic timer
 	nk_simple_timing_loop(LOOP_ITERS);
@@ -1335,14 +1335,14 @@ static void calibrate_apic_timer(struct apic_dev *apic)
 	scale = tsc_diff / apic_diff;
 	scale_sum += scale;
 
-	if (scale<scale_min) { 
-	    scale_min=scale; 
+	if (scale<scale_min) {
+	    scale_min=scale;
 	}
     }
 
     apic->cycles_per_tick = scale_sum/num_trials;
 
-    APIC_PRINT("Detected APIC 0x%x at %lu Hz and cycles per us as %lu (core at %lu Hz) calibration mode=%d\n",apic->id,apic->bus_freq_hz,apic->cycles_per_us,apic->cycles_per_us*1000000,mode); 
+    APIC_PRINT("Detected APIC 0x%x at %lu Hz and cycles per us as %lu (core at %lu Hz) calibration mode=%d\n",apic->id,apic->bus_freq_hz,apic->cycles_per_us,apic->cycles_per_us*1000000,mode);
     APIC_PRINT("Detected APIC 0x%x CPU cycles per tick as %lu cycles (min was %lu)\n", apic->id, apic->cycles_per_tick,scale_min);
 
 }
@@ -1369,7 +1369,7 @@ static int apic_timer_handler(excp_entry_t * excp, excp_vec_t vec, void *state)
     // note that the low-level interrupt handler code in excp_early.S
     // takes care of invoking the scheduler if needed, and the scheduler
     // will in turn change the time after we leave - it may set the
-    // timer to expire earlier.  The scheduler can refer to 
+    // timer to expire earlier.  The scheduler can refer to
     // the apic to determine that it is being invoked in timer interrupt
     // context.   In this way, it can differentiate:
     //   1. invocation from a thread
@@ -1379,9 +1379,9 @@ static int apic_timer_handler(excp_entry_t * excp, excp_vec_t vec, void *state)
     // can fire before the expected elapsed time expires.  If the scheduler
     // doesn't reset the timer when this happens, the scheduler may be delayed
     // as far as the next interrupt or cooperative rescheduling request,
-    // breaking real-time semantics.  
+    // breaking real-time semantics.
 
-    if (time_to_next_ns == -1) { 
+    if (time_to_next_ns == -1) {
 	// indicates "infinite", which we turn into the maximum timer count
 	apic_set_oneshot_timer(apic,-1);
     } else {

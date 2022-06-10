@@ -40,7 +40,7 @@ uint8_t nk_get_cpu_by_lapicid (uint8_t lapicid);
 
 
 
-#include <dev/apic.h>
+#include <arch/x64/apic.h>
 #include <nautilus/spinlock.h>
 #include <nautilus/mm.h>
 #include <nautilus/queue.h>

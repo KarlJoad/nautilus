@@ -28,7 +28,7 @@
 #include <nautilus/paging.h>
 #include <nautilus/cpuid.h>
 #include <nautilus/mm.h>
-#include <dev/apic.h>
+#include <arch/x64/apic.h>
 #include <dev/ioapic.h>
 
 

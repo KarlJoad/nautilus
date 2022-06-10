@@ -25,7 +25,7 @@
 
 #include <nautilus/nautilus.h>
 #include <dev/i8254.h>
-#include <dev/apic.h>
+#include <arch/x64/apic.h>
 #include <dev/ioapic.h>
 
 

@@ -77,7 +77,7 @@
 #include <net/collective/ethernet/ethernet_collective.h>
 #endif
 
-#include <dev/apic.h>
+#include <arch/x64/apic.h>
 #include <dev/pci.h>
 #include <dev/hpet.h>
 #include <dev/ioapic.h>

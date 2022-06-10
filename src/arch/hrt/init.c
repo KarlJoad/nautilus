@@ -55,7 +55,7 @@
 #include <nautilus/barrier.h>
 #include <arch/hrt/hrt.h>
 
-#include <dev/apic.h>
+#include <arch/x64/apic.h>
 #include <dev/pci.h>
 #include <dev/hpet.h>
 #include <dev/ioapic.h>

@@ -31,7 +31,7 @@
 #ifdef NAUT_CONFIG_PROVENANCE
 #include <nautilus/provenance.h>
 #endif
-#include <dev/apic.h>
+#include <arch/x64/apic.h>
 
 
 /*

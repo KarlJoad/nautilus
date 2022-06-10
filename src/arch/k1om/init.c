@@ -56,7 +56,7 @@
 #include <nautilus/rwlock.h>
 #include <nautilus/condvar.h>
 
-#include <dev/apic.h>
+#include <arch/x64/apic.h>
 #include <dev/pci.h>
 #include <dev/ioapic.h>
 #include <arch/k1om/xeon_phi.h>

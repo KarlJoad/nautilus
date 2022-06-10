@@ -62,7 +62,7 @@
 #include <nautilus/backtrace.h>
 #include <nautilus/shell.h>
 #include <nautilus/topo.h>
-#include <dev/apic.h>
+#include <arch/x64/apic.h>
 #include <dev/gpio.h>
 
 // enforce lower limits on period and slice / sporadic size

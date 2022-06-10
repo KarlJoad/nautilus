@@ -29,7 +29,7 @@
 #include <nautilus/spinlock.h>
 #include <nautilus/random.h>
 #include <nautilus/mm.h>
-#include <dev/apic.h>
+#include <arch/x64/apic.h>
 
 
 void

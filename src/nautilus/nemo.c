@@ -28,7 +28,7 @@
 #include <nautilus/mm.h>
 #include <nautilus/naut_assert.h>
 
-#include <dev/apic.h>
+#include <arch/x64/apic.h>
 
 #define NEMO_DEBUG(fmt, args...) DEBUG_PRINT("NEMO: " fmt, ##args)
 #define NEMO_INFO(fmt, args...)  printk("NEMO: " fmt, ##args)

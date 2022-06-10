@@ -34,7 +34,7 @@
 #include <nautilus/atomic.h>
 #include <nautilus/naut_string.h>
 #include <nautilus/multiboot2.h>
-#include <dev/apic.h>
+#include <arch/x64/apic.h>
 
 
 #ifndef NAUT_CONFIG_DEBUG_NUMA

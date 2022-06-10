@@ -5,4 +5,5 @@ obj-y += asm/ \
 		 numa.o \
 		 smp.o \
 		 early_mem.o \
-		 shutdown.o 
+		 shutdown.o \
+		 apic.o
