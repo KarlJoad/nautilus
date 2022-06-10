@@ -580,6 +580,7 @@ apic_dump (struct apic_dev * apic)
 		       );
 	}
 
+#ifdef NAUT_CONFIG_X86_64_HOST
 	if (nk_is_amd() && amd_has_ext_lvt(apic)) {
 	    APIC_DEBUG(
                 "  EXT (AMD-only): 0x%08x (Ext LVT Count=%u, Ext APIC ID=%u, Specific EOI=%u, Int Enable Reg=%u)\n",
@@ -600,7 +601,8 @@ apic_dump (struct apic_dev * apic)
             );
         }
     }
-        
+#endif
+
     APIC_DEBUG(
 		"  ESR: 0x%08x (Error Status Reg, non-zero is bad)\n",
 		apic_read(apic, APIC_REG_ESR)
