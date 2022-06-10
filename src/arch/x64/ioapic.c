@@ -1,17 +1,17 @@
-/* 
+/*
  * This file is part of the Nautilus AeroKernel developed
- * by the Hobbes and V3VEE Projects with funding from the 
- * United States National  Science Foundation and the Department of Energy.  
+ * by the Hobbes and V3VEE Projects with funding from the
+ * United States National  Science Foundation and the Department of Energy.
  *
  * The V3VEE Project is a joint project between Northwestern University
  * and the University of New Mexico.  The Hobbes Project is a collaboration
- * led by Sandia National Laboratories that includes several national 
+ * led by Sandia National Laboratories that includes several national
  * laboratories and universities. You can find out more at:
  * http://www.v3vee.org  and
  * http://xstack.sandia.gov/hobbes
  *
  * Copyright (c) 2015, Kyle C. Hale <kh@u.northwestern.edu>
- * Copyright (c) 2015, The V3VEE Project  <http://www.v3vee.org> 
+ * Copyright (c) 2015, The V3VEE Project  <http://www.v3vee.org>
  *                     The Hobbes Project <http://xstack.sandia.gov/hobbes>
  * All rights reserved.
  *
@@ -23,7 +23,7 @@
 #include <nautilus/nautilus.h>
 #include <nautilus/paging.h>
 #include <nautilus/dev.h>
-#include <dev/ioapic.h>
+#include <arch/x64/ioapic.h>
 #include <nautilus/irq.h>
 #include <nautilus/shell.h>
 #include <nautilus/mm.h>
@@ -37,7 +37,7 @@
 #define IOAPIC_PRINT(fmt, args...) printk("IOAPIC: " fmt, ##args)
 
 
-static uint64_t 
+static uint64_t
 ioapic_read_irq_entry (struct ioapic * ioapic, uint8_t irq)
 {
     uint32_t lo, hi;
@@ -80,7 +80,7 @@ ioapic_get_max_entry (struct ioapic * ioapic)
 }
 
 
-void 
+void
 ioapic_unmask_irq (struct ioapic * ioapic, uint8_t irq)
 {
     uint32_t val;
@@ -91,25 +91,25 @@ ioapic_unmask_irq (struct ioapic * ioapic, uint8_t irq)
 }
 
 
-static void 
+static void
 ioapic_assign_irq (struct ioapic * ioapic,
-                   uint8_t irq, 
+                   uint8_t irq,
                    uint8_t vector,
-                   uint8_t polarity, 
+                   uint8_t polarity,
                    uint8_t trigger_mode,
                    uint8_t mask_it)
 {
     ASSERT(irq < ioapic->num_entries);
-    ioapic_write_irq_entry(ioapic, irq, 
+    ioapic_write_irq_entry(ioapic, irq,
                            vector                             |
                            (mask_it ? IOAPIC_MASK_IRQ : 0)    |
                            (DELMODE_FIXED << DEL_MODE_SHIFT)  |
-                           (polarity << INTPOL_SHIFT)         | 
+                           (polarity << INTPOL_SHIFT)         |
                            (trigger_mode << TRIG_MODE_SHIFT));
 }
 
 
-static uint8_t 
+static uint8_t
 ioapic_get_id (struct ioapic * ioapic)
 {
     uint32_t ret;
@@ -117,7 +117,7 @@ ioapic_get_id (struct ioapic * ioapic)
     return (ret >> 24) & 0xf;
 }
 
-static uint8_t 
+static uint8_t
 ioapic_get_version (struct ioapic * ioapic)
 {
     uint32_t ret;
@@ -163,7 +163,7 @@ ioapic_dump (struct ioapic * ioapic)
     );
 
     IOAPIC_DEBUG(
-        "  ARB: 0x%08x (Arb. ID=0x%01x)\n", 
+        "  ARB: 0x%08x (Arb. ID=0x%01x)\n",
         ioapic_read_reg(ioapic, IOAPICARB_REG),
         IOAPIC_GET_ARBID(ioapic_read_reg(ioapic, IOAPICARB_REG))
     );
@@ -187,7 +187,7 @@ ioapic_dump (struct ioapic * ioapic)
         );
 
         IOAPIC_DEBUG(
-            "             Delivery Mode=%s, IDT VECTOR %u\n", 
+            "             Delivery Mode=%s, IDT VECTOR %u\n",
             del_modes[IORED_GET_DEL_MODE(val)],
             IORED_GET_VEC(val)
         );
@@ -242,8 +242,8 @@ __ioapic_init (struct ioapic * ioapic, uint8_t ioapic_id)
     }
 
     /* now walk through the MP Table IO INT entries */
-    list_for_each_entry(ioint, 
-            &(nk_get_nautilus_info()->sys.int_info.int_list), 
+    list_for_each_entry(ioint,
+            &(nk_get_nautilus_info()->sys.int_info.int_list),
             elm) {
 
         uint8_t pol;
@@ -255,12 +255,12 @@ __ioapic_init (struct ioapic * ioapic, uint8_t ioapic_id)
         }
 
         /* PCI IRQs get their own IOAPIC entrires
-         * we're not going to bother with dealing 
-         * with PIC mode 
+         * we're not going to bother with dealing
+         * with PIC mode
          */
         if (nk_int_matches_bus(ioint, "ISA", 3)) {
             pol     = 0;
-            trig    = 0; 
+            trig    = 0;
             newirq  = ioint->src_bus_irq;
         } else if (nk_int_matches_bus(ioint, "PCI", 3)) {
             pol     = 1;
@@ -273,13 +273,13 @@ __ioapic_init (struct ioapic * ioapic, uint8_t ioapic_id)
             trig    = 0;
             newirq  = 20 + ioint->src_bus_irq;
         }
-        
 
-        /* TODO: this is not quite right. Here I'm making the assumption that 
+
+        /* TODO: this is not quite right. Here I'm making the assumption that
          * we only assign PCI A, B, C, and D to one IORED entry each. Technically
          * we should be able to, e.g. assign Dev 1 PCI A and Dev 2 PCI A to different
          * IOAPIC IORED entries. The BIOS should, and does appear to, set things up
-         * this way 
+         * this way
          */
         if (!nk_irq_is_assigned(newirq)) {
 
@@ -291,7 +291,7 @@ __ioapic_init (struct ioapic * ioapic, uint8_t ioapic_id)
                     irq_to_vec(newirq),
                     ioint->dst_ioapic_intin);
 
-            ioapic_assign_irq(ioapic, 
+            ioapic_assign_irq(ioapic,
                     ioint->dst_ioapic_intin,
                     irq_to_vec(newirq),
                     pol,
@@ -323,7 +323,7 @@ static struct nk_dev_int ops = {
     .close=0,
 };
 
-int 
+int
 ioapic_init (struct sys_info * sys)
 {
     int i = 0;
@@ -345,7 +345,7 @@ ioapic_init (struct sys_info * sys)
         imcr_begin_sym_io();
     }
 #endif
-    
+
     return 0;
 }
 
@@ -360,23 +360,23 @@ handle_ioapic (char * buf, void * priv)
     char what[80];
     int mask=0;
 
-    if (sscanf(buf,"ioapic %u %s %s",&num,all,what)==3) { 
-        if (num>=sys->num_ioapics) { 
+    if (sscanf(buf,"ioapic %u %s %s",&num,all,what)==3) {
+        if (num>=sys->num_ioapics) {
             nk_vc_printf("unknown ioapic\n");
             return 0;
         }
-        if (what[0]!='m' && what[0]!='u') { 
+        if (what[0]!='m' && what[0]!='u') {
             nk_vc_printf("unknown ioapic request (mask|unmask)\n");
             return 0;
         }
         mask = what[0]=='m';
 
-        if (all[0]!='a') { 
-            if (sscanf(all,"%u",&pin)!=1) { 
+        if (all[0]!='a') {
+            if (sscanf(all,"%u",&pin)!=1) {
                 nk_vc_printf("unknown ioapic request (pin|all)\n");
                 return 0;
             }
-            if (mask) { 
+            if (mask) {
                 nk_vc_printf("masking ioapic %u pin %u\n",num,pin);
                 ioapic_mask_irq(sys->ioapics[num], pin);
             } else {
@@ -384,8 +384,8 @@ handle_ioapic (char * buf, void * priv)
                 ioapic_unmask_irq(sys->ioapics[num], pin);
             }
         } else {
-            for (pin=0;pin<sys->ioapics[num]->num_entries;pin++) { 
-                if (mask) { 
+            for (pin=0;pin<sys->ioapics[num]->num_entries;pin++) {
+                if (mask) {
                     nk_vc_printf("masking ioapic %u pin %u\n",num,pin);
                     ioapic_mask_irq(sys->ioapics[num], pin);
                 } else {
@@ -397,19 +397,19 @@ handle_ioapic (char * buf, void * priv)
         return 0;
     }
 
-    if (sscanf(buf,"ioapic %s",what)==1) { 
-        if (what[0]=='l' || what[0]=='d') { 
+    if (sscanf(buf,"ioapic %s",what)==1) {
+        if (what[0]=='l' || what[0]=='d') {
             for (num=0;num<sys->num_ioapics;num++) {
                 io = sys->ioapics[num];
                 nk_vc_printf("ioapic %u: id=%u %u pins address=%p\n",
                         num, io->id, io->num_entries, (void*)io->base);
-                if (what[0]=='d') { 
+                if (what[0]=='d') {
                     uint64_t entry;
-                    for (pin=0;pin<io->num_entries;pin++) { 
+                    for (pin=0;pin<io->num_entries;pin++) {
                         entry = (uint64_t) ioapic_read_reg(io, 0x10 + 2*pin);
                         entry |= ((uint64_t) ioapic_read_reg(io, 0x10 + 2*pin+1));
 
-                        nk_vc_printf("  pin %2u -> %016lx (dest 0x%lx mask %lu vec 0x%lx%s)\n", 
+                        nk_vc_printf("  pin %2u -> %016lx (dest 0x%lx mask %lu vec 0x%lx%s)\n",
                                 pin, entry, (entry>>56)&0xffLU, (entry>>16)&0x1LU,
                                 entry&0xffLU, (entry&0xffLU) == 0xf7 ? " panic" : "");
                     }
@@ -419,7 +419,7 @@ handle_ioapic (char * buf, void * priv)
         } else {
             nk_vc_printf("Unknown ioapic request\n");
             return 0;
-        }				       
+        }
     }
 
     nk_vc_printf("unknown ioapic request\n");

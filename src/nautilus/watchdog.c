@@ -26,7 +26,7 @@
 #include <nautilus/nautilus.h>
 #include <dev/i8254.h>
 #include <arch/x64/apic.h>
-#include <dev/ioapic.h>
+#include <arch/x64/ioapic.h>
 
 
 #ifndef NAUT_CONFIG_DEBUG_WATCHDOG

@@ -37,7 +37,7 @@
 #include <nautilus/mm.h>
 #include <nautilus/fpu.h>
 #include <nautilus/percpu.h>
-#include <dev/ioapic.h>
+#include <arch/x64/ioapic.h>
 #include <arch/x64/apic.h>
 
 #ifdef NAUT_CONFIG_ASPACES

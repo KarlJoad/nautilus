@@ -29,7 +29,7 @@
 #include <nautilus/cpuid.h>
 #include <nautilus/mm.h>
 #include <arch/x64/apic.h>
-#include <dev/ioapic.h>
+#include <arch/x64/ioapic.h>
 
 
 #if NAUT_CONFIG_DEBUG_SFI

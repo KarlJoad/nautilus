@@ -150,7 +150,6 @@ void panic(const char *, ...) __attribute__((noreturn));
 #endif
 
 
-#include <dev/ioapic.h>
 #include <nautilus/smp.h>
 #include <nautilus/paging.h>
 #include <nautilus/limits.h>
@@ -243,6 +242,7 @@ nk_get_nautilus_info (void)
 #include <arch/hrt/main.h>
 #elif defined NAUT_CONFIG_X86_64_HOST
 #include <arch/x64/main.h>
+#include <arch/x64/ioapic.h>
 #elif defined NAUT_CONFIG_GEM5
 #include <arch/gem5/main.h>
 #elif defined NAUT_CONFIG_RISCV_HOST

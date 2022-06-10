@@ -80,7 +80,7 @@
 #include <arch/x64/apic.h>
 #include <dev/pci.h>
 #include <dev/hpet.h>
-#include <dev/ioapic.h>
+#include <arch/x64/ioapic.h>
 #include <dev/i8254.h>
 #include <dev/ps2.h>
 #ifdef NAUT_CONFIG_GPIO

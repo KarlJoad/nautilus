@@ -1,5 +1,4 @@
-obj-y += ioapic.o \
-	 i8254.o \
+obj-y += i8254.o \
 	 ps2.o \
 	 pci.o \
          vga.o \
